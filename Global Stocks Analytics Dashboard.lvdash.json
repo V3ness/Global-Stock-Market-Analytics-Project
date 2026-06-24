@@ -1,0 +1,2382 @@
+{
+  "datasets": [
+    {
+      "name": "5b1d12f2",
+      "displayName": "market_perf_1",
+      "queryLines": [
+        "-- Create an unpivoted dataset\r\n",
+        "SELECT \r\n",
+        "    Index,\r\n",
+        "    Region,\r\n",
+        "    Date,\r\n",
+        "    Year,\r\n",
+        "    'Opening Price' as metric_name,\r\n",
+        "    Open as metric_value\r\n",
+        "FROM gsma_workspace.global_stocks_schema.gold_daily_prices\r\n",
+        "\r\n",
+        "UNION ALL\r\n",
+        "\r\n",
+        "SELECT \r\n",
+        "    Index,\r\n",
+        "    Region,\r\n",
+        "    Date,\r\n",
+        "    Year,\r\n",
+        "    'High Price' as metric_name,\r\n",
+        "    High as metric_value\r\n",
+        "FROM gsma_workspace.global_stocks_schema.gold_daily_prices\r\n",
+        "\r\n",
+        "UNION ALL\r\n",
+        "\r\n",
+        "SELECT \r\n",
+        "    Index,\r\n",
+        "    Region,\r\n",
+        "    Date,\r\n",
+        "    Year,\r\n",
+        "    'Low Price' as metric_name,\r\n",
+        "    Low as metric_value\r\n",
+        "FROM gsma_workspace.global_stocks_schema.gold_daily_prices\r\n",
+        "\r\n",
+        "UNION ALL\r\n",
+        "\r\n",
+        "SELECT \r\n",
+        "    Index,\r\n",
+        "    Region,\r\n",
+        "    Date,\r\n",
+        "    Year,\r\n",
+        "    'Closing Price' as metric_name,\r\n",
+        "    Close as metric_value\r\n",
+        "FROM gsma_workspace.global_stocks_schema.gold_daily_prices"
+      ]
+    },
+    {
+      "name": "ba926980",
+      "displayName": "market_perf_2",
+      "queryLines": [
+        "select\r\n",
+        "    Index,\r\n",
+        "    Year,\r\n",
+        "    ytd_return as highest_ytd_return\r\n",
+        "from gsma_workspace.global_stocks_schema.gold_ytd_return\r\n",
+        "where ytd_return = (\r\n",
+        "    select max(ytd_return) \r\n",
+        "    from gsma_workspace.global_stocks_schema.gold_ytd_return\r\n",
+        ");"
+      ]
+    },
+    {
+      "name": "8e5f6ade",
+      "displayName": "market_perf_3.1",
+      "queryLines": [
+        "select\r\n",
+        "    Index,\r\n",
+        "    round(avg(ytd_return), 2) as avg_ytd_return\r\n",
+        "from gsma_workspace.global_stocks_schema.gold_ytd_return\r\n",
+        "group by Index\r\n",
+        "order by avg(ytd_return) desc\r\n",
+        "limit 3;"
+      ]
+    },
+    {
+      "name": "7837d7bb",
+      "displayName": "market_perf_3.2",
+      "queryLines": [
+        "select\r\n",
+        "    Index,\r\n",
+        "    round(avg(ytd_return), 2) as avg_ytd_return\r\n",
+        "from gsma_workspace.global_stocks_schema.gold_ytd_return\r\n",
+        "group by Index\r\n",
+        "order by avg(ytd_return) asc\r\n",
+        "limit 3;"
+      ]
+    },
+    {
+      "name": "885ef694",
+      "displayName": "time_trends_1",
+      "queryLines": [
+        "select\r\n",
+        "    Index,\r\n",
+        "    Year,\r\n",
+        "    round(avg(close), 2) as avg_close\r\n",
+        "from gsma_workspace.global_stocks_schema.gold_daily_prices\r\n",
+        "group by index, year;"
+      ]
+    },
+    {
+      "name": "4cfa7a9b",
+      "displayName": "time_trends_2",
+      "queryLines": [
+        "select\r\n",
+        "    Index,\r\n",
+        "    Year,\r\n",
+        "    round((avg_yearly_return / volatility), 4) as risk_adjusted_return\r\n",
+        "from gsma_workspace.global_stocks_schema.gold_multi_year_performance;"
+      ]
+    },
+    {
+      "name": "d4a75b5e",
+      "displayName": "time_trends_3",
+      "queryLines": [
+        "select\r\n",
+        "    Index,\r\n",
+        "    Month,\r\n",
+        "    Year,\r\n",
+        "    avg_monthly_return\r\n",
+        "from gsma_workspace.global_stocks_schema.gold_avg_daily_return;"
+      ]
+    },
+    {
+      "name": "4c8d9f68",
+      "displayName": "volatility_1",
+      "queryLines": [
+        "select\r\n",
+        "    Index,\r\n",
+        "    Year,\r\n",
+        "    volatility as highest_volatility\r\n",
+        "from gsma_workspace.global_stocks_schema.gold_volatility\r\n",
+        "where volatility = (\r\n",
+        "    select max(volatility)\r\n",
+        "    from gsma_workspace.global_stocks_schema.gold_volatility\r\n",
+        ");"
+      ]
+    },
+    {
+      "name": "9e1bbb45",
+      "displayName": "volatility_2",
+      "queryLines": [
+        "select\r\n",
+        "    Index,\r\n",
+        "    Year,\r\n",
+        "    volatility\r\n",
+        "from gsma_workspace.global_stocks_schema.gold_volatility;"
+      ]
+    },
+    {
+      "name": "24f7ad17",
+      "displayName": "volatility_3",
+      "queryLines": [
+        "select\r\n",
+        "    Index,\r\n",
+        "    Year,\r\n",
+        "    avg_yearly_return,\r\n",
+        "    volatility,\r\n",
+        "    case\r\n",
+        "        when avg_yearly_return > 0.001 and volatility < 0.02 then \"Stable & High Return\"\r\n",
+        "        when avg_yearly_return > 0.001 and volatility >= 0.02 then \"High Return, High Risk\"\r\n",
+        "        when avg_yearly_return <= 0.001 and volatility < 0.02 then \"Stable but Low Return\"\r\n",
+        "        else \"High Risk, Poor Return\"\r\n",
+        "    end as risk_category\r\n",
+        "from gsma_workspace.global_stocks_schema.gold_multi_year_performance;"
+      ]
+    },
+    {
+      "name": "9219e5aa",
+      "displayName": "control_1",
+      "queryLines": [
+        "select\r\n",
+        "    Index,\r\n",
+        "    Year,\r\n",
+        "    round(avg(daily_return), 4) as avg_daily_return\r\n",
+        "from gsma_workspace.global_stocks_schema.gold_daily_prices\r\n",
+        "group by index, year;"
+      ]
+    },
+    {
+      "name": "618fb3bc",
+      "displayName": "control_2",
+      "queryLines": [
+        "select\r\n",
+        "    Region,\r\n",
+        "    Year,\r\n",
+        "    round(avg(daily_return), 4) as avg_daily_return\r\n",
+        "from gsma_workspace.global_stocks_schema.gold_daily_prices\r\n",
+        "group by region, year;"
+      ]
+    },
+    {
+      "name": "c3999af7",
+      "displayName": "control_3",
+      "queryLines": [
+        "select\r\n",
+        "    Index,\r\n",
+        "    round(avg(ytd_return), 2) as avg_ytd_return\r\n",
+        "from gsma_workspace.global_stocks_schema.gold_ytd_return\r\n",
+        "group by Index\r\n",
+        "order by avg(ytd_return) desc;"
+      ]
+    },
+    {
+      "name": "summary_overview",
+      "displayName": "summary_overview",
+      "queryLines": [
+        "-- Comprehensive summary metrics across all indices\n",
+        "SELECT\n",
+        "  Index,\n",
+        "  Region,\n",
+        "  -- Performance metrics\n",
+        "  ROUND(AVG(daily_return), 4) as avg_daily_return,\n",
+        "  ROUND(AVG(ytd_return), 2) as avg_ytd_return,\n",
+        "  -- Volatility metrics\n",
+        "  ROUND(AVG(volatility), 4) as avg_volatility,\n",
+        "  ROUND(AVG(avg_yearly_return), 4) as avg_yearly_return,\n",
+        "  -- Risk-adjusted return\n",
+        "  ROUND(AVG(avg_yearly_return / NULLIF(volatility, 0)), 4) as risk_adjusted_return,\n",
+        "  -- Classification\n",
+        "  CASE\n",
+        "    WHEN\n",
+        "      AVG(avg_yearly_return) > 0.001\n",
+        "      AND AVG(volatility) < 0.02\n",
+        "    THEN\n",
+        "      'Stable & High Return'\n",
+        "    WHEN\n",
+        "      AVG(avg_yearly_return) > 0.001\n",
+        "      AND AVG(volatility) >= 0.02\n",
+        "    THEN\n",
+        "      'High Return, High Risk'\n",
+        "    WHEN\n",
+        "      AVG(avg_yearly_return) <= 0.001\n",
+        "      AND AVG(volatility) < 0.02\n",
+        "    THEN\n",
+        "      'Stable but Low Return'\n",
+        "    ELSE 'High Risk, Poor Return'\n",
+        "  END as overall_risk_category\n",
+        "FROM\n",
+        "  (\n",
+        "    SELECT\n",
+        "      p.Index,\n",
+        "      p.Region,\n",
+        "      p.daily_return,\n",
+        "      y.ytd_return,\n",
+        "      m.volatility,\n",
+        "      m.avg_yearly_return\n",
+        "    FROM\n",
+        "      gsma_workspace.global_stocks_schema.gold_daily_prices p\n",
+        "        LEFT JOIN gsma_workspace.global_stocks_schema.gold_ytd_return y\n",
+        "          ON p.Index = y.Index\n",
+        "          AND p.Year = y.Year\n",
+        "        LEFT JOIN gsma_workspace.global_stocks_schema.gold_multi_year_performance m\n",
+        "          ON p.Index = m.Index\n",
+        "          AND p.Year = m.Year\n",
+        "  )\n",
+        "GROUP BY\n",
+        "  Index,\n",
+        "  Region\n",
+        "ORDER BY\n",
+        "  avg_ytd_return DESC"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "acf6afcb",
+      "displayName": "Market Performance",
+      "layout": [
+        {
+          "widget": {
+            "name": "title_header",
+            "multilineTextboxSpec": {
+              "lines": [
+                "# Global Stock Market Performance Analysis\n",
+                "\n",
+                "Comprehensive analysis of major global indices: performance trends, YTD returns, and country rankings"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "q1_performance",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "5b1d12f2",
+                  "fields": [
+                    {
+                      "name": "Index",
+                      "expression": "`Index`"
+                    },
+                    {
+                      "name": "Year",
+                      "expression": "`Year`"
+                    },
+                    {
+                      "name": "avg(metric_value)",
+                      "expression": "AVG(`metric_value`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Multi-Year Index Performance (Measured by Avg Metric Value)",
+                "showTitle": true
+              },
+              "mark": {
+                "size": 0.4
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "Year",
+                  "displayName": "Year",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(metric_value)",
+                  "displayName": "Avg Metric Value",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "Index",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 12,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "q3_best",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "8e5f6ade",
+                  "fields": [
+                    {
+                      "name": "Index",
+                      "expression": "`Index`"
+                    },
+                    {
+                      "name": "avg_ytd_return",
+                      "expression": "`avg_ytd_return`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Top 3 Best Performing Countries (2000-2026)",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "Index",
+                  "displayName": "Index",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "avg_ytd_return",
+                  "displayName": "Avg YTD Return",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 14,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "q3_worst",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "7837d7bb",
+                  "fields": [
+                    {
+                      "name": "Index",
+                      "expression": "`Index`"
+                    },
+                    {
+                      "name": "avg_ytd_return",
+                      "expression": "`avg_ytd_return`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Top 3 Worst Performing Countries (2000-2026)",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "Index",
+                  "displayName": "Index",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "avg_ytd_return",
+                  "displayName": "Avg YTD Return",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 14,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "filter-by-year",
+            "queries": [
+              {
+                "name": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16b9f881211758a2116121f10a464_Year",
+                "query": {
+                  "datasetName": "5b1d12f2",
+                  "fields": [
+                    {
+                      "name": "min(Year)",
+                      "expression": "MIN(`Year`)"
+                    },
+                    {
+                      "name": "max(Year)",
+                      "expression": "MAX(`Year`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "selection": {
+                "defaultSelection": {
+                  "range": {
+                    "dataType": "INTEGER",
+                    "min": {
+                      "value": "2000"
+                    },
+                    "max": {
+                      "value": "2026"
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Index Performance: FIlter by Year"
+              },
+              "widgetType": "range-slider",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "Year",
+                    "queryName": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16b9f881211758a2116121f10a464_Year"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 2,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "838195be",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ba926980",
+                  "fields": [
+                    {
+                      "name": "highest_ytd_return",
+                      "expression": "`highest_ytd_return`"
+                    },
+                    {
+                      "name": "Index",
+                      "expression": "`Index`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Highest year-to-date YTD Returns Generated (2000-2026)",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "Index"
+                },
+                "target": {
+                  "fieldName": "highest_ytd_return",
+                  "style": {
+                    "bold": true,
+                    "fontSize": 26
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "filter-index-performance",
+            "queries": [
+              {
+                "name": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16b9f881211758a2116121f10a464_metric_name",
+                "query": {
+                  "datasetName": "5b1d12f2",
+                  "fields": [
+                    {
+                      "name": "metric_name",
+                      "expression": "`metric_name`"
+                    },
+                    {
+                      "name": "metric_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "disallowAll": true,
+              "selection": {
+                "defaultSelection": {
+                  "values": {
+                    "dataType": "STRING",
+                    "values": [
+                      {
+                        "value": "Closing Price"
+                      }
+                    ]
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Index Performance: Filter by Metric"
+              },
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "metric_name",
+                    "queryName": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16b9f881211758a2116121f10a464_metric_name"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 6,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "ba0e969f",
+      "displayName": "Time-Based Trends",
+      "layout": [
+        {
+          "widget": {
+            "name": "9295c939",
+            "multilineTextboxSpec": {
+              "lines": [
+                "# Global Stock Market Time-Based Trends\n",
+                "\n",
+                "Comprehensive analysis of major global indices: closing price trends, index growth, and trends across months and years"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "q1_closing_trends",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "885ef694",
+                  "fields": [
+                    {
+                      "name": "Index",
+                      "expression": "`Index`"
+                    },
+                    {
+                      "name": "Year",
+                      "expression": "`Year`"
+                    },
+                    {
+                      "name": "avg_close",
+                      "expression": "`avg_close`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Long-Term Closing Price Trends",
+                "showTitle": true
+              },
+              "mark": {
+                "size": 0.4
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "Year",
+                  "displayName": "Year",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg_close",
+                  "displayName": "Avg Closing Price",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "Index",
+                  "displayName": "Index",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 12,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "q2_consistent_growth",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "4cfa7a9b",
+                  "fields": [
+                    {
+                      "name": "Index",
+                      "expression": "`Index`"
+                    },
+                    {
+                      "name": "avg(risk_adjusted_return)",
+                      "expression": "AVG(`risk_adjusted_return`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Risk-Adjusted Returns (Growth Indicator)",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "Index",
+                  "displayName": "Index",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "natural-order"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(risk_adjusted_return)",
+                  "axis": {
+                    "hideTitle": false
+                  },
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "displayName": "Avg Risk-Adjusted Return",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "Index",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 6,
+            "height": 9
+          }
+        },
+        {
+          "widget": {
+            "name": "q3_monthly_trends",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d4a75b5e",
+                  "fields": [
+                    {
+                      "name": "Index",
+                      "expression": "`Index`"
+                    },
+                    {
+                      "name": "Year",
+                      "expression": "`Year`"
+                    },
+                    {
+                      "name": "Month",
+                      "expression": "`Month`"
+                    },
+                    {
+                      "name": "avg(avg_monthly_return)",
+                      "expression": "AVG(`avg_monthly_return`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Monthly Return Trends",
+                "showTitle": true
+              },
+              "mark": {
+                "size": 0.4
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "Month",
+                  "axis": {
+                    "hideGrid": false,
+                    "hideLabels": false
+                  },
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "none",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    },
+                    "significantFigures": {
+                      "type": "all"
+                    }
+                  },
+                  "displayName": "Month",
+                  "scale": {
+                    "type": "quantitative",
+                    "domain": {
+                      "min": 1,
+                      "max": 12
+                    },
+                    "reverse": false
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(avg_monthly_return)",
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "displayName": "Avg Monthly Return",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "Index",
+                  "displayName": "Index",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "shape": {
+                  "fieldName": "Year",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 12,
+            "width": 6,
+            "height": 9
+          }
+        },
+        {
+          "widget": {
+            "name": "filter-year",
+            "queries": [
+              {
+                "name": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16bdcd5be164a984201f80191ddd9_Year",
+                "query": {
+                  "datasetName": "885ef694",
+                  "fields": [
+                    {
+                      "name": "min(Year)",
+                      "expression": "MIN(`Year`)"
+                    },
+                    {
+                      "name": "max(Year)",
+                      "expression": "MAX(`Year`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16bdd3bd31985929e536c78df50f2_Year",
+                "query": {
+                  "datasetName": "4cfa7a9b",
+                  "fields": [
+                    {
+                      "name": "min(Year)",
+                      "expression": "MIN(`Year`)"
+                    },
+                    {
+                      "name": "max(Year)",
+                      "expression": "MAX(`Year`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "selection": {
+                "defaultSelection": {
+                  "range": {
+                    "dataType": "INTEGER",
+                    "min": {
+                      "value": "2000"
+                    },
+                    "max": {
+                      "value": "2026"
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Trends: Filter by Year"
+              },
+              "widgetType": "range-slider",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "Year",
+                    "queryName": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16bdcd5be164a984201f80191ddd9_Year"
+                  },
+                  {
+                    "fieldName": "Year",
+                    "queryName": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16bdd3bd31985929e536c78df50f2_Year"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "filter-return-by-year-1",
+            "queries": [
+              {
+                "name": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16bdd80d9144c953bf27072b94a2b_Year",
+                "query": {
+                  "datasetName": "d4a75b5e",
+                  "fields": [
+                    {
+                      "name": "Year",
+                      "expression": "`Year`"
+                    },
+                    {
+                      "name": "Year_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "disallowAll": false,
+              "selection": {
+                "defaultSelection": {
+                  "values": {
+                    "dataType": "INTEGER",
+                    "values": [
+                      {
+                        "value": "2000"
+                      }
+                    ]
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Monthly Return: Filter by Year"
+              },
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "Year",
+                    "queryName": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16bdd80d9144c953bf27072b94a2b_Year"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 2,
+            "width": 6,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "b2de991a",
+      "displayName": "Volatility & Risk",
+      "layout": [
+        {
+          "widget": {
+            "name": "title_header",
+            "multilineTextboxSpec": {
+              "lines": [
+                "# Global Stock Market Volatility & Risk Analysis\n",
+                "\n",
+                "Comprehensive analysis of major global indices: volatility patterns,  market stability assessment, and highest volatility recorded."
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "q1_highest_volatility",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "24f7ad17",
+                  "fields": [
+                    {
+                      "name": "risk_category",
+                      "expression": "`risk_category`"
+                    },
+                    {
+                      "name": "Index",
+                      "expression": "`Index`"
+                    },
+                    {
+                      "name": "Year",
+                      "expression": "`Year`"
+                    },
+                    {
+                      "name": "volatility",
+                      "expression": "`volatility`"
+                    },
+                    {
+                      "name": "avg_yearly_return",
+                      "expression": "`avg_yearly_return`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Market Stability Analysis"
+              },
+              "mark": {
+                "shape": "circle",
+                "size": 3
+              },
+              "widgetType": "scatter",
+              "encodings": {
+                "x": {
+                  "fieldName": "volatility",
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "displayName": "Volatility (Risk Level)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg_yearly_return",
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "displayName": "Avg Yearly Return",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "risk_category",
+                  "displayName": "Risk Category",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "High Return, High Risk",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 1
+                        }
+                      }
+                    ]
+                  }
+                },
+                "extra": [
+                  {
+                    "fieldName": "Index"
+                  },
+                  {
+                    "fieldName": "Year"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 11,
+            "width": 12,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "q2_volatility_trends",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "9e1bbb45",
+                  "fields": [
+                    {
+                      "name": "Index",
+                      "expression": "`Index`"
+                    },
+                    {
+                      "name": "Year",
+                      "expression": "`Year`"
+                    },
+                    {
+                      "name": "volatility",
+                      "expression": "`volatility`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Volatility Trends Over Time",
+                "showTitle": true
+              },
+              "mark": {
+                "size": 0.4
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "Year",
+                  "displayName": "Year",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "volatility",
+                  "axis": {
+                    "hideGrid": false,
+                    "hideLabels": false
+                  },
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "displayName": "Volatility",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "Index",
+                  "displayName": "Index",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 12,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "highest_vol_counter",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "4c8d9f68",
+                  "fields": [
+                    {
+                      "name": "highest_volatility",
+                      "expression": "`highest_volatility`"
+                    },
+                    {
+                      "name": "Index",
+                      "expression": "`Index`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Highest Volatility Recorded (2000-2026)",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "Index"
+                },
+                "target": {
+                  "fieldName": "highest_volatility",
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "style": {
+                    "bold": true,
+                    "fontSize": 26
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 18,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "volatility-filter-by-year",
+            "queries": [
+              {
+                "name": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16bde7a7d1b9688b00e65ba2fbf82_Year",
+                "query": {
+                  "datasetName": "9e1bbb45",
+                  "fields": [
+                    {
+                      "name": "min(Year)",
+                      "expression": "MIN(`Year`)"
+                    },
+                    {
+                      "name": "max(Year)",
+                      "expression": "MAX(`Year`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16bde908f1e27b0b5cfb0889d31d1_Year",
+                "query": {
+                  "datasetName": "24f7ad17",
+                  "fields": [
+                    {
+                      "name": "min(Year)",
+                      "expression": "MIN(`Year`)"
+                    },
+                    {
+                      "name": "max(Year)",
+                      "expression": "MAX(`Year`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "selection": {
+                "defaultSelection": {
+                  "range": {
+                    "dataType": "INTEGER",
+                    "min": {
+                      "value": "2000"
+                    },
+                    "max": {
+                      "value": "2026"
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Volatility: Filter by Year"
+              },
+              "widgetType": "range-slider",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "Year",
+                    "queryName": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16bde7a7d1b9688b00e65ba2fbf82_Year"
+                  },
+                  {
+                    "fieldName": "Year",
+                    "queryName": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16bde908f1e27b0b5cfb0889d31d1_Year"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "filter1",
+            "queries": [
+              {
+                "name": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16bde908f1e27b0b5cfb0889d31d1_Index",
+                "query": {
+                  "datasetName": "24f7ad17",
+                  "fields": [
+                    {
+                      "name": "Index",
+                      "expression": "`Index`"
+                    },
+                    {
+                      "name": "Index_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Market Stability: Filter by Index"
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "Index",
+                    "queryName": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16bde908f1e27b0b5cfb0889d31d1_Index"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 2,
+            "width": 6,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "afa8e39c",
+      "displayName": "Country & Regional Comparisons",
+      "layout": [
+        {
+          "widget": {
+            "name": "title_header",
+            "multilineTextboxSpec": {
+              "lines": [
+                "# Country & Regional Comparisons\n",
+                "\n",
+                "Comparative analysis of major global indices: daily returns, regional differences, and long-term performance across countries"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "q1_country_daily_returns",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "9219e5aa",
+                  "fields": [
+                    {
+                      "name": "Index",
+                      "expression": "`Index`"
+                    },
+                    {
+                      "name": "avg(avg_daily_return)",
+                      "expression": "AVG(`avg_daily_return`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "title": "Country Comparison: Average Daily Returns",
+                "showTitle": true
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "Index",
+                  "displayName": "Country Index",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "natural-order"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(avg_daily_return)",
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "displayName": "Avg Daily Return",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "Index",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 12,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "q2_regional_differences",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "618fb3bc",
+                  "fields": [
+                    {
+                      "name": "Region",
+                      "expression": "`Region`"
+                    },
+                    {
+                      "name": "Year",
+                      "expression": "`Year`"
+                    },
+                    {
+                      "name": "avg_daily_return",
+                      "expression": "`avg_daily_return`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Daily Return of Regional Differences Over Time",
+                "showTitle": true
+              },
+              "mark": {
+                "size": 0.4
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "Year",
+                  "displayName": "Year",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg_daily_return",
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "displayName": "Avg Daily Return",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "Region",
+                  "displayName": "Region",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 11,
+            "width": 12,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "q3_long_term_performance",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "c3999af7",
+                  "fields": [
+                    {
+                      "name": "Index",
+                      "expression": "`Index`"
+                    },
+                    {
+                      "name": "avg_ytd_return",
+                      "expression": "`avg_ytd_return`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Strongest Long-Term Performance (2000-2026)",
+                "showTitle": true
+              },
+              "mark": {
+                "layout": "stack"
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "Index",
+                  "displayName": "Country Index",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "avg_ytd_return",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "displayName": "Avg YTD Return",
+                  "scale": {
+                    "type": "quantitative",
+                    "reverse": false
+                  }
+                },
+                "color": {
+                  "fieldName": "Index",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 18,
+            "width": 12,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "daily-return-filter-by-year",
+            "queries": [
+              {
+                "name": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16bdf5d511b07a6c485f8ca25b2cf_Year",
+                "query": {
+                  "datasetName": "618fb3bc",
+                  "fields": [
+                    {
+                      "name": "min(Year)",
+                      "expression": "MIN(`Year`)"
+                    },
+                    {
+                      "name": "max(Year)",
+                      "expression": "MAX(`Year`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16bdf16d0131ab937a510d31bb3b1_Year",
+                "query": {
+                  "datasetName": "9219e5aa",
+                  "fields": [
+                    {
+                      "name": "min(Year)",
+                      "expression": "MIN(`Year`)"
+                    },
+                    {
+                      "name": "max(Year)",
+                      "expression": "MAX(`Year`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "selection": {
+                "defaultSelection": {
+                  "range": {
+                    "dataType": "INTEGER",
+                    "min": {
+                      "value": "2000"
+                    },
+                    "max": {
+                      "value": "2026"
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Daily Return: Filter by Year"
+              },
+              "widgetType": "range-slider",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "Year",
+                    "queryName": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16bdf5d511b07a6c485f8ca25b2cf_Year"
+                  },
+                  {
+                    "fieldName": "Year",
+                    "queryName": "dashboards/01f16b9ce43e1512841fd3947f3bf855/datasets/01f16bdf16d0131ab937a510d31bb3b1_Year"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 12,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "602347e1",
+      "displayName": "Summary",
+      "layout": [
+        {
+          "widget": {
+            "name": "executive_summary",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Executive Summary: Global Stock Market Insights (2000-2026)\n",
+                "\n",
+                "**Key Findings Across All Markets:**\n",
+                "\n",
+                "**Performance Leaders:**\n",
+                "\n",
+                "* **Turkey (BIST100)** leads with 38.62% average YTD returns and highest risk-adjusted returns (6.9%)\n",
+                "* **India (NIFTY50)** shows strong consistent growth with 19.04% YTD and excellent risk-adjusted performance\n",
+                "* **Brazil (BOVESPA)** demonstrates resilience with 23.89% YTD despite emerging market volatility\n",
+                "\n",
+                "**Regional Patterns:**\n",
+                "\n",
+                "* **Asia** shows highest growth potential but with elevated volatility\n",
+                "* **Europe** exhibits moderate, stable returns with lower risk profiles\n",
+                "* **North America** maintains steady performance with balanced risk-return characteristics\n",
+                "\n",
+                "**Risk & Volatility:**\n",
+                "\n",
+                "* **Highest volatility recorded:** Turkey experienced significant market swings driven by economic reforms\n",
+                "* **Most stable markets:** Germany (DAX40), UK (FTSE100), and USA (SP500) show consistent low-volatility patterns\n",
+                "* **Risk categories:** 40% of indices classified as \"Stable & High Return\", 20% as \"High Return, High Risk\"\n",
+                "\n",
+                "**Time-Based Trends:**\n",
+                "\n",
+                "* **Long-term growth:** Clear upward trajectory in closing prices across all major indices post-2009\n",
+                "* **Seasonal patterns:** Monthly return analysis reveals Q4 strength and January volatility across markets\n",
+                "* **Crisis recovery:** All markets showed V-shaped recovery post-2020, with emerging markets rebounding faster"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 10
+          }
+        },
+        {
+          "widget": {
+            "name": "best_performer_counter",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "summary_overview",
+                  "fields": [
+                    {
+                      "name": "avg_ytd_return",
+                      "expression": "`avg_ytd_return`"
+                    },
+                    {
+                      "name": "Index",
+                      "expression": "`Index`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "title": "Top Overall Performer",
+                "showTitle": true
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "Index"
+                },
+                "target": {
+                  "fieldName": "avg_ytd_return",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "none",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    }
+                  },
+                  "formatTemplate": "{{ @formatted }}%",
+                  "style": {
+                    "bold": true,
+                    "fontSize": 26
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 10,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "most_stable_counter",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "summary_overview",
+                  "fields": [
+                    {
+                      "name": "avg_volatility",
+                      "expression": "`avg_volatility`"
+                    },
+                    {
+                      "name": "Index",
+                      "expression": "`Index`"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`overall_risk_category` IN ('Stable & High Return', 'Stable but Low Return')"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "title": "Most Stable Market",
+                "showTitle": true
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "Index"
+                },
+                "target": {
+                  "fieldName": "avg_volatility",
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    }
+                  },
+                  "style": {
+                    "bold": true,
+                    "fontSize": 26
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 10,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "best_risk_adjusted_counter",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "summary_overview",
+                  "fields": [
+                    {
+                      "name": "risk_adjusted_return",
+                      "expression": "`risk_adjusted_return`"
+                    },
+                    {
+                      "name": "Index",
+                      "expression": "`Index`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "title": "Best Risk-Adjusted Return",
+                "showTitle": true
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "Index"
+                },
+                "target": {
+                  "fieldName": "risk_adjusted_return",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "none",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 4
+                    }
+                  },
+                  "style": {
+                    "bold": true,
+                    "fontSize": 26
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 10,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "summary_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "summary_overview",
+                  "fields": [
+                    {
+                      "name": "Index",
+                      "expression": "`Index`"
+                    },
+                    {
+                      "name": "Region",
+                      "expression": "`Region`"
+                    },
+                    {
+                      "name": "avg_daily_return",
+                      "expression": "`avg_daily_return`"
+                    },
+                    {
+                      "name": "avg_ytd_return",
+                      "expression": "`avg_ytd_return`"
+                    },
+                    {
+                      "name": "avg_volatility",
+                      "expression": "`avg_volatility`"
+                    },
+                    {
+                      "name": "risk_adjusted_return",
+                      "expression": "`risk_adjusted_return`"
+                    },
+                    {
+                      "name": "overall_risk_category",
+                      "expression": "`overall_risk_category`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "title": "Comprehensive Market Summary",
+                "showTitle": true
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "Index",
+                    "useForSearch": true
+                  },
+                  {
+                    "fieldName": "Region",
+                    "useForSearch": true
+                  },
+                  {
+                    "fieldName": "avg_daily_return",
+                    "format": {
+                      "type": "number-percent",
+                      "decimalPlaces": {
+                        "type": "max",
+                        "places": 2
+                      }
+                    },
+                    "displayName": "Avg Daily Return"
+                  },
+                  {
+                    "fieldName": "avg_ytd_return",
+                    "format": {
+                      "type": "number-plain",
+                      "abbreviation": "none",
+                      "decimalPlaces": {
+                        "type": "max",
+                        "places": 2
+                      }
+                    },
+                    "displayName": "Avg YTD Return",
+                    "formatTemplate": "{{ @formatted }}%"
+                  },
+                  {
+                    "fieldName": "avg_volatility",
+                    "format": {
+                      "type": "number-percent",
+                      "decimalPlaces": {
+                        "type": "max",
+                        "places": 2
+                      }
+                    },
+                    "displayName": "Avg Volatility"
+                  },
+                  {
+                    "fieldName": "risk_adjusted_return",
+                    "format": {
+                      "type": "number-plain",
+                      "abbreviation": "none",
+                      "decimalPlaces": {
+                        "type": "max",
+                        "places": 4
+                      }
+                    },
+                    "displayName": "Risk-Adjusted Return"
+                  },
+                  {
+                    "fieldName": "overall_risk_category",
+                    "useForSearch": true,
+                    "displayName": "Risk Category"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 13,
+            "width": 12,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "regional_comparison",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "summary_overview",
+                  "fields": [
+                    {
+                      "name": "Region",
+                      "expression": "`Region`"
+                    },
+                    {
+                      "name": "avg(avg_ytd_return)",
+                      "expression": "AVG(`avg_ytd_return`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "title": "Regional Performance Comparison",
+                "showTitle": true
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "Region",
+                  "displayName": "Region",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(avg_ytd_return)",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "none",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "formatTemplate": "{{ @formatted }}%",
+                  "displayName": "Avg YTD Return",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "Region",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 21,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "risk_return_positioning",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "summary_overview",
+                  "fields": [
+                    {
+                      "name": "overall_risk_category",
+                      "expression": "`overall_risk_category`"
+                    },
+                    {
+                      "name": "avg_volatility",
+                      "expression": "`avg_volatility`"
+                    },
+                    {
+                      "name": "avg_ytd_return",
+                      "expression": "`avg_ytd_return`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "title": "Risk-Return Market Positioning",
+                "showTitle": true
+              },
+              "version": 3,
+              "mark": {
+                "shape": "circle",
+                "size": 3
+              },
+              "widgetType": "scatter",
+              "encodings": {
+                "x": {
+                  "fieldName": "avg_volatility",
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "displayName": "Average Volatility (Risk)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg_ytd_return",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "none",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "formatTemplate": "{{ @formatted }}%",
+                  "displayName": "Average YTD Return",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "overall_risk_category",
+                  "displayName": "Risk Category",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 21,
+            "width": 6,
+            "height": 7
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
